@@ -131,12 +131,25 @@ class DefaultXMLParser(object):
             buf.seek(0)
             msg, _, remaining = buf.read().decode('UTF-8').partition(MSG_DELIM)
             msg = msg.strip()
+            correction = 0
+            list_ = [
+                'You are now in Privilege Class (ADMIN)',
+                '\nYou are now in Privilege Class (ADMIN)',
+                'You are now in Privilege Class (Netconf-FULL-ACCESS)',
+                '\nYou are now in Privilege Class (Netconf-FULL-ACCESS)',
+            ]
+            for item in list_:
+                if msg.startswith(item):
+                    correction = msg.find('<')
+                    msg = msg[correction:]
+                    break
+
             if sys.version < '3':
                 self._session._dispatch_message(msg.encode())
             else:
                 self._session._dispatch_message(msg)
             self._session._buffer = StringIO()
-            self._parsing_pos10 = 0
+            self._parsing_pos10 = 0 + correction
             if len(remaining.strip()) > 0:
                 # There could be another entire message in the
                 # buffer, so we should try to parse again.
